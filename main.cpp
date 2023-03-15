@@ -8,12 +8,6 @@
 struct force_valueless_by_exception {
   force_valueless_by_exception() = default;
 
-  // std::variant is only guaranteed to be valueless by exception
-  // only if an exception is thrown during the move
-  // initialization of the contained value during
-  // move assignment
-  // source:
-  // https://en.cppreference.com/w/cpp/utility/variant/valueless_by_exception
   // NOLINTNEXTLINE
   [[noreturn]] force_valueless_by_exception(force_valueless_by_exception&&)
   {
@@ -40,16 +34,18 @@ auto main() -> int
 {
 
   std::variant<std::monostate, force_valueless_by_exception>
-    test_variant {};
+    example_variant {};
 
-  fmt::print("{}\n", test_variant);
+  fmt::print("{}\n", example_variant);
 
   try {
     force_valueless_by_exception forcer {};
-    test_variant.emplace<force_valueless_by_exception>(std::move(forcer));
+    example_variant.emplace<force_valueless_by_exception>(
+      std::move(forcer));
   } catch ( ... ) { }
 
-  fmt::print("{}\n", test_variant);
+  // variant is now valueless by exception
+  fmt::print("{}\n", example_variant);
 
   return 0;
 }
